@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SchemaSecure · Command Division</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#0a0c10;
+  --ink2:#0f1318;
+  --ink3:#161b23;
+  --panel:#111620;
+  --panel2:#161d28;
+  --steel:#1e2736;
+  --wire:#253347;
+  --accent:#c8a84b;
+  --accent2:#e8c96e;
+  --accent3:#f5e090;
+  --green:#3ddc84;
+  --green2:#22c55e;
+  --red:#f04040;
+  --red2:#ef4444;
+  --orange:#f97316;
+  --blue:#38bdf8;
+  --text:#d8e4f0;
+  --text2:#7a94b0;
+  --text3:#3a5068;
+  --border:rgba(200,168,75,0.18);
+  --border2:rgba(200,168,75,0.08);
+  --glow:0 0 20px rgba(200,168,75,0.15);
+  --shadow:0 4px 24px rgba(0,0,0,0.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:'Barlow',sans-serif;
+  background:var(--ink);
+  color:var(--text);
+  font-size:13px;
+  cursor:default;
+}
+
+/* NOISE TEXTURE */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1000;opacity:0.4;
+}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.7}}
+@keyframes scan{0%{top:-4px}100%{top:100%}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+.screen{display:none;height:100vh;overflow:hidden;}
+.screen.active{display:flex;flex-direction:column;animation:fadeIn 0.3s ease;}
+
+/* ═══════════════ TOP COMMAND BAR ═══════════════ */
+.topbar{
+  background:var(--ink2);
+  border-bottom:1px solid var(--border);
+  height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  flex-shrink:0;
+  position:relative;
+}
+.topbar::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:0.4;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-shield{
+  width:32px;height:36px;
+  background:linear-gradient(160deg,var(--accent),var(--accent2));
+  clip-path:polygon(50% 0%,100% 15%,100% 70%,50% 100%,0% 70%,0% 15%);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.logo-text{
+  font-family:'Rajdhani',sans-serif;
+  font-size:18px;font-weight:700;
+  letter-spacing:0.12em;
+  color:var(--accent2);
+}
+.logo-text em{color:var(--text2);font-style:normal;font-weight:400;font-size:10px;display:block;letter-spacing:0.18em;margin-top:-2px;}
+.topbar-center{display:flex;align-items:center;gap:4px;}
+.tnav{
+  padding:5px 13px;border-radius:4px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:600;letter-spacing:0.08em;
+  color:var(--text2);cursor:pointer;transition:all 0.15s;
+  border:1px solid transparent;
+  text-transform:uppercase;
+}
+.tnav:hover{color:var(--text);background:var(--steel);}
+.tnav.active{color:var(--accent2);border-color:var(--border);background:var(--panel);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.sys-status{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--green);
+  background:rgba(61,220,132,0.06);
+  border:1px solid rgba(61,220,132,0.2);
+  padding:4px 10px;border-radius:3px;
+}
+.sys-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+.clock-val{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text2);}
+.tbtn{
+  padding:6px 13px;border-radius:4px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;font-weight:600;letter-spacing:0.08em;
+  cursor:pointer;border:none;transition:all 0.15s;
+  text-transform:uppercase;
+}
+.tbtn-gold{background:var(--accent);color:var(--ink);}.tbtn-gold:hover{background:var(--accent2);}
+.tbtn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2);}.tbtn-ghost:hover{border-color:var(--accent);color:var(--accent2);}
+.tbtn-red{background:rgba(240,64,64,0.12);border:1px solid rgba(240,64,64,0.25);color:var(--red);}.tbtn-red:hover{background:rgba(240,64,64,0.2);}
+
+/* ═══════════════ MAIN CONTENT ═══════════════ */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.dash{padding:14px 18px;overflow-y:auto;height:100%;}
+.tab-content{display:none;animation:fadeIn 0.25s ease;}
+.tab-content.active{display:block;}
+
+/* PAGE HEADER */
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.ph-left .ph-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text);}
+.ph-left .ph-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:1px;}
+.ph-actions{display:flex;gap:6px;}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.stat{
+  background:var(--panel);border:1px solid var(--border2);border-radius:6px;
+  padding:14px;position:relative;overflow:hidden;
+}
+.stat::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+}
+.stat.s-green::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.stat.s-gold::before{background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.stat.s-red::before{background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.stat.s-blue::before{background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+.stat-icon{width:30px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:700;line-height:1;letter-spacing:-0.01em;}
+.stat-label{font-size:10px;color:var(--text2);margin-top:3px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;}
+.stat-badge{display:inline-block;margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;}
+
+/* GRID LAYOUTS */
+.grid-main{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:12px;}
+.grid-bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.grid-full{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* PANEL */
+.panel{background:var(--panel);border:1px solid var(--border2);border-radius:6px;padding:14px;}
+.panel-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;padding-bottom:10px;
+  border-bottom:1px solid var(--border2);
+}
+.panel-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);
+  display:flex;align-items:center;gap:7px;
+}
+.panel-actions{display:flex;gap:5px;}
+
+/* CAMERA GRID */
+.cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cam-wrap{
+  position:relative;background:#050810;border-radius:5px;
+  aspect-ratio:16/9;overflow:hidden;cursor:pointer;
+  border:1px solid var(--wire);
+  transition:border-color 0.2s;
+}
+.cam-wrap:hover{border-color:var(--accent);}
+.cam-wrap.cam-live{border-color:rgba(61,220,132,0.5);}
+.cam-wrap.cam-err{border-color:rgba(240,64,64,0.4);}
+video{width:100%;height:100%;object-fit:cover;display:block;}
+.cam-scanline{
+  position:absolute;left:0;right:0;height:3px;
+  background:linear-gradient(transparent,rgba(200,168,75,0.15),transparent);
+  animation:scan 3s linear infinite;
+  pointer-events:none;
+}
+.cam-overlay{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(transparent 85%,rgba(0,0,0,0.7) 100%),
+    radial-gradient(ellipse at 50% 50%,transparent 60%,rgba(0,0,0,0.25));
+}
+.cam-corners{position:absolute;inset:0;pointer-events:none;}
+.cam-corners::before,.cam-corners::after{
+  content:'';position:absolute;width:12px;height:12px;
+  border-color:var(--accent);border-style:solid;
+}
+.cam-corners::before{top:5px;left:5px;border-width:1.5px 0 0 1.5px;}
+.cam-corners::after{bottom:5px;right:5px;border-width:0 1.5px 1.5px 0;}
+.cam-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:5px 8px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cam-name{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,255,255,0.8);letter-spacing:0.06em;}
+.cam-live-badge{display:flex;align-items:center;gap:3px;font-family:'Share Tech Mono',monospace;font-size:8px;}
+.rec-dot{width:5px;height:5px;border-radius:50%;animation:blink 1.2s infinite;}
+.cam-top-bar{position:absolute;top:0;left:0;right:0;padding:4px 8px;display:flex;align-items:center;justify-content:space-between;}
+.cam-id{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--accent);letter-spacing:0.08em;}
+.cam-offline-placeholder{
+  width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;
+  background:radial-gradient(ellipse at center,#0d1520,#050810);
+}
+.cam-btn-row{display:flex;gap:4px;margin-top:6px;}
+.cam-mini-btn{
+  padding:3px 8px;border-radius:3px;font-size:9px;font-weight:600;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:0.06em;
+  cursor:pointer;border:none;text-transform:uppercase;
+}
+
+/* ALERT LIST */
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2);}
+.alert-item:last-child{border-bottom:none;}
+.alert-sev{width:3px;border-radius:1px;align-self:stretch;flex-shrink:0;}
+.alert-body{flex:1;}
+.alert-msg{font-size:12px;color:var(--text);font-weight:500;}
+.alert-meta{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px;}
+.alert-time{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);}
+.alert-actions{display:flex;gap:4px;margin-top:5px;}
+.mini-btn{
+  padding:2px 8px;border-radius:2px;font-size:10px;font-weight:600;
+  font-family:'Share Tech Mono',monospace;cursor:pointer;border:none;
+  transition:all 0.15s;letter-spacing:0.04em;
+}
+.mini-btn-edit{background:rgba(56,189,248,0.1);color:var(--blue);border:1px solid rgba(56,189,248,0.2);}
+.mini-btn-edit:hover{background:rgba(56,189,248,0.2);}
+.mini-btn-del{background:rgba(240,64,64,0.1);color:var(--red);border:1px solid rgba(240,64,64,0.15);}
+.mini-btn-del:hover{background:rgba(240,64,64,0.2);}
+.mini-btn-print{background:rgba(200,168,75,0.1);color:var(--accent2);border:1px solid rgba(200,168,75,0.2);}
+.mini-btn-print:hover{background:rgba(200,168,75,0.2);}
+
+/* ACCESS LOG TABLE */
+.log-table{width:100%;border-collapse:collapse;}
+.log-table th{
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);
+  padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;
+}
+.log-table td{padding:7px 8px;border-bottom:1px solid var(--border2);font-size:11px;vertical-align:middle;}
+.log-table tr:last-child td{border-bottom:none;}
+.log-table tr:hover td{background:rgba(200,168,75,0.03);}
+.tag{font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;font-weight:700;letter-spacing:0.06em;}
+.tag-ok{background:rgba(61,220,132,0.1);color:var(--green);border:1px solid rgba(61,220,132,0.2);}
+.tag-deny{background:rgba(240,64,64,0.1);color:var(--red);border:1px solid rgba(240,64,64,0.15);}
+.tag-pend{background:rgba(249,115,22,0.1);color:var(--orange);border:1px solid rgba(249,115,22,0.15);}
+.act-btns{display:flex;gap:4px;}
+
+/* DEVICES TABLE */
+.dev-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border2);}
+.dev-row:last-child{border-bottom:none;}
+.dev-name{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;}
+.dev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dev-right{display:flex;align-items:center;gap:6px;}
+.dev-status{font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 8px;border-radius:2px;}
+.ds-ok{background:rgba(61,220,132,0.08);color:var(--green);border:1px solid rgba(61,220,132,0.15);}
+.ds-warn{background:rgba(249,115,22,0.08);color:var(--orange);border:1px solid rgba(249,115,22,0.15);}
+.ds-err{background:rgba(240,64,64,0.08);color:var(--red);border:1px solid rgba(240,64,64,0.12);}
+
+/* ZONE MAP */
+.zone-map{border-radius:5px;overflow:hidden;border:1px solid var(--border2);}
+
+/* BAR CHART */
+.bar-wrap{display:flex;align-items:flex-end;gap:5px;height:56px;margin-top:8px;}
+.bar{flex:1;border-radius:2px 2px 0 0;transition:height 0.3s;}
+
+/* SETTINGS TOGGLE */
+.sec-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin:14px 0 8px;}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border2);}
+.tog-row:last-child{border-bottom:none;}
+.tog-info .tl{font-size:12px;font-weight:500;color:var(--text);}
+.tog-info .ts{font-size:10px;color:var(--text3);margin-top:1px;}
+.tog{width:36px;height:20px;background:var(--steel);border-radius:999px;position:relative;cursor:pointer;border:1px solid var(--wire);transition:background 0.2s;flex-shrink:0;}
+.tog.on{background:rgba(61,220,132,0.3);border-color:rgba(61,220,132,0.4);}
+.tog::after{content:'';position:absolute;width:13px;height:13px;background:var(--text3);border-radius:50%;top:3px;left:3px;transition:all 0.2s;}
+.tog.on::after{left:20px;background:var(--green);}
+
+/* PROFILE */
+.profile-hero{text-align:center;padding:20px 0 14px;}
+.avatar-ring{
+  width:68px;height:68px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+  font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--ink);
+  box-shadow:0 0 0 3px rgba(200,168,75,0.2);
+}
+.pro-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;letter-spacing:0.04em;}
+.pro-role{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.06em;}
+.badge-row{display:flex;justify-content:center;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.pro-badge{font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 9px;border-radius:2px;background:rgba(200,168,75,0.1);color:var(--accent2);border:1px solid var(--border);}
+.detail-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);}
+.detail-row:last-child{border-bottom:none;}
+.detail-label{font-size:10px;color:var(--text3);width:100px;flex-shrink:0;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;}
+.detail-val{font-size:12px;color:var(--text);}
+
+/* ═══ OVERLAYS ═══ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(4,8,16,0.85);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.overlay.show{display:flex;}
+.modal{
+  background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+  padding:0;max-width:480px;width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 0 1px rgba(200,168,75,0.1);
+  animation:modalIn 0.25s ease;
+  overflow:hidden;
+}
+.modal-hd{
+  background:var(--ink2);border-bottom:1px solid var(--border);
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent2);}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;}
+.modal-close:hover{color:var(--red);}
+.modal-body{padding:18px;}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--border2);display:flex;justify-content:flex-end;gap:8px;}
+.m-field{margin-bottom:13px;}
+.m-label{display:block;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.m-input{
+  width:100%;padding:8px 10px;
+  background:var(--ink);border:1px solid var(--wire);border-radius:4px;
+  color:var(--text);font-size:12px;font-family:'Barlow',sans-serif;
+  outline:none;transition:all 0.15s;
+}
+.m-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(200,168,75,0.1);}
+.m-input::placeholder{color:var(--text3);}
+.m-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.confirm-icon{font-size:36px;text-align:center;margin-bottom:10px;}
+.confirm-msg{text-align:center;color:var(--text2);font-size:13px;line-height:1.5;}
+.confirm-item{font-weight:600;color:var(--red);font-family:'Share Tech Mono',monospace;}
+
+/* AUTH SCREEN */
+.auth-screen{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 30% 40%,rgba(200,168,75,0.04) 0%,transparent 60%),var(--ink);
+}
+.auth-box{
+  width:100%;max-width:400px;
+  background:var(--panel);border:1px solid var(--border);border-radius:8px;
+  padding:36px 30px;
+  box-shadow:var(--shadow),0 0 60px rgba(200,168,75,0.06);
+}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-shield{
+  width:56px;height:62px;margin:0 auto 12px;
+  background:linear-gradient(160deg,var(--accent),var(--accent2));
+  clip-path:polygon(50% 0%,100% 15%,100% 70%,50% 100%,0% 70%,0% 15%);
+  display:flex;align-items:center;justify-content:center;
+}
+.auth-title{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;letter-spacing:0.12em;color:var(--accent2);}
+.auth-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:0.08em;}
+.a-label{display:block;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.a-input{
+  width:100%;padding:10px 12px;
+  background:var(--ink);border:1px solid var(--wire);border-radius:4px;
+  color:var(--text);font-size:13px;font-family:'Barlow',sans-serif;
+  outline:none;transition:all 0.15s;margin-bottom:13px;
+}
+.a-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,168,75,0.08);}
+.a-input::placeholder{color:var(--text3);}
+select.a-input{cursor:pointer;}
+.auth-btn{
+  width:100%;padding:11px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:var(--ink);font-size:14px;font-weight:700;
+  border:none;border-radius:4px;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:0.1em;text-transform:uppercase;
+  transition:all 0.2s;margin-top:4px;
+  box-shadow:0 4px 16px rgba(200,168,75,0.25);
+}
+.auth-btn:hover{box-shadow:0 6px 22px rgba(200,168,75,0.4);}
+.auth-link{text-align:center;margin-top:14px;font-size:12px;color:var(--text3);}
+.auth-link span{color:var(--accent);cursor:pointer;}.auth-link span:hover{color:var(--accent2);}
+.auth-err{color:var(--red);font-family:'Share Tech Mono',monospace;font-size:10px;text-align:center;margin-top:8px;display:none;}
+.auth-ok{color:var(--green);font-family:'Share Tech Mono',monospace;font-size:10px;text-align:center;margin-top:8px;display:none;}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;}
+.auth-div-line{flex:1;height:1px;background:var(--border2);}
+.auth-div-txt{color:var(--text3);font-size:10px;font-family:'Share Tech Mono',monospace;}
+.auth-ghost{
+  width:100%;padding:10px;background:transparent;
+  border:1px solid var(--wire);color:var(--text2);border-radius:4px;
+  cursor:pointer;font-size:12px;font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.15s;
+}
+.auth-ghost:hover{border-color:var(--accent);color:var(--accent2);}
+.aform-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* WEBCAM NOTICE */
+.cam-notice{
+  background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.2);
+  border-radius:4px;padding:8px 12px;margin-bottom:10px;
+  font-size:11px;color:var(--accent);font-weight:500;
+  display:flex;align-items:center;gap:8px;
+}
+
+/* PRINT STYLES */
+@media print{
+  body{background:#fff!important;color:#000!important;}
+  .topbar,.ph-actions,.panel-actions,.act-btns,.cam-scanline,.alert-actions,.cam-btn-row{display:none!important;}
+  .panel,.stat,.cam-wrap{border:1px solid #ccc!important;break-inside:avoid;}
+  *{color:#000!important;background:transparent!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LOGOUT OVERLAY ═══════════ -->
+<div class="overlay" id="ovLogout">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-hd"><div class="modal-title">⚠ End Session</div><button class="modal-close" onclick="closeOv('ovLogout')">✕</button></div>
+    <div class="modal-body">
+      <div class="confirm-icon">🔒</div>
+      <div class="confirm-msg">You are about to terminate your secure operator session.<br>All active surveillance continues uninterrupted.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn tbtn-ghost" onclick="closeOv('ovLogout')">Cancel</button>
+      <button class="tbtn tbtn-red" onclick="doLogout()">Confirm Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ EDIT OVERLAY ═══════════ -->
+<div class="overlay" id="ovEdit">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">✏ Edit Record</div><button class="modal-close" onclick="closeOv('ovEdit')">✕</button></div>
+    <div class="modal-body">
+      <div class="m-row">
+        <div class="m-field"><label class="m-label">Name / ID</label><input class="m-input" id="editName" placeholder="Operator name"/></div>
+        <div class="m-field"><label class="m-label">Zone</label><input class="m-input" id="editZone" placeholder="Zone / Location"/></div>
+      </div>
+      <div class="m-row">
+        <div class="m-field"><label class="m-label">Access Level</label>
+          <select class="m-input" id="editLevel">
+            <option>Level 1 — Viewer</option><option>Level 2 — Operator</option>
+            <option>Level 3 — Supervisor</option><option>Level 4 — Admin</option>
+          </select>
+        </div>
+        <div class="m-field"><label class="m-label">Status</label>
+          <select class="m-input" id="editStatus">
+            <option>Granted</option><option>Denied</option><option>Pending</option>
+          </select>
+        </div>
+      </div>
+      <div class="m-field"><label class="m-label">Notes</label><input class="m-input" id="editNotes" placeholder="Additional notes..."/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn tbtn-ghost" onclick="closeOv('ovEdit')">Cancel</button>
+      <button class="tbtn tbtn-gold" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DELETE OVERLAY ═══════════ -->
+<div class="overlay" id="ovDelete">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-hd"><div class="modal-title" style="color:var(--red);">🗑 Delete Record</div><button class="modal-close" onclick="closeOv('ovDelete')">✕</button></div>
+    <div class="modal-body">
+      <div class="confirm-icon">⚠️</div>
+      <div class="confirm-msg">You are about to permanently delete:<br><br><span class="confirm-item" id="deleteTarget">Record #001</span><br><br>This action cannot be undone.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn tbtn-ghost" onclick="closeOv('ovDelete')">Cancel</button>
+      <button class="tbtn tbtn-red" onclick="confirmDelete()">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ADD RECORD OVERLAY ═══════════ -->
+<div class="overlay" id="ovAdd">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">+ Add Access Record</div><button class="modal-close" onclick="closeOv('ovAdd')">✕</button></div>
+    <div class="modal-body">
+      <div class="m-row">
+        <div class="m-field"><label class="m-label">Full Name</label><input class="m-input" id="addName" placeholder="Officer name"/></div>
+        <div class="m-field"><label class="m-label">Badge ID</label><input class="m-input" id="addBadge" placeholder="#B-0000"/></div>
+      </div>
+      <div class="m-row">
+        <div class="m-field"><label class="m-label">Zone / Door</label><input class="m-input" id="addZone" placeholder="Main Entrance"/></div>
+        <div class="m-field"><label class="m-label">Access Level</label>
+          <select class="m-input" id="addLevel"><option>Level 1</option><option>Level 2</option><option>Level 3</option><option>Level 4</option></select>
+        </div>
+      </div>
+      <div class="m-field"><label class="m-label">Status</label>
+        <select class="m-input" id="addStatus"><option>Granted</option><option>Denied</option><option>Pending</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn tbtn-ghost" onclick="closeOv('ovAdd')">Cancel</button>
+      <button class="tbtn tbtn-gold" onclick="addRecord()">Add Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PRINT PREVIEW OVERLAY ═══════════ -->
+<div class="overlay" id="ovPrint">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hd"><div class="modal-title">🖨 Print / Export Report</div><button class="modal-close" onclick="closeOv('ovPrint')">✕</button></div>
+    <div class="modal-body">
+      <div style="background:var(--ink);border:1px solid var(--border2);border-radius:4px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.8;color:var(--text2);" id="printPreviewBody"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn tbtn-ghost" onclick="closeOv('ovPrint')">Close</button>
+      <button class="tbtn tbtn-gold" onclick="doPrint()">🖨 Print Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════ -->
+<div class="screen active" id="screenLogin" style="flex-direction:column;">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-shield"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L1 4v4c0 3 2.4 5.5 6 6.5 3.6-1 6-3.5 6-6.5V4L7 1z" fill="var(--ink)"/></svg></div>
+      <div class="logo-text">SCHEMA<em>SECURE · COMMAND DIVISION</em></div>
+    </div>
+    <div class="sys-status"><div class="sys-dot"></div>SYSTEM OPERATIONAL</div>
+  </div>
+  <div class="auth-screen">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div class="auth-shield"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L2 6v7c0 4.5 3.8 8.7 9 10 5.2-1.3 9-5.5 9-10V6L11 2z" fill="var(--ink)" stroke="var(--ink)" stroke-width="0.5"/></svg></div>
+        <div class="auth-title">SCHEMA SECURE</div>
+        <div class="auth-sub">COMMAND DIVISION · AUTHORIZED ACCESS ONLY</div>
+      </div>
+      <label class="a-label">Operator ID / Email</label>
+      <input class="a-input" id="lgEmail" type="text" placeholder="operator@schemasecure.mil"/>
+      <label class="a-label">Access Code</label>
+      <input class="a-input" id="lgPass" type="password" placeholder="••••••••••"/>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);cursor:pointer;"><input type="checkbox" style="accent-color:var(--accent);"/> Remember device</label>
+        <span style="font-size:11px;color:var(--accent);cursor:pointer;">Forgot code?</span>
+      </div>
+      <button class="auth-btn" onclick="doLogin()">Authenticate & Enter</button>
+      <div class="auth-err" id="lgErr">⚠ INVALID CREDENTIALS — ACCESS DENIED</div>
+      <div class="auth-divider"><div class="auth-div-line"></div><div class="auth-div-txt">NO ACCOUNT?</div><div class="auth-div-line"></div></div>
+      <button class="auth-ghost" onclick="showScreen('screenSignup')">Create Operator Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SIGNUP SCREEN
+═══════════════════════════════════════ -->
+<div class="screen" id="screenSignup" style="flex-direction:column;">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-shield"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L1 4v4c0 3 2.4 5.5 6 6.5 3.6-1 6-3.5 6-6.5V4L7 1z" fill="var(--ink)"/></svg></div>
+      <div class="logo-text">SCHEMA<em>SECURE · NEW REGISTRATION</em></div>
+    </div>
+  </div>
+  <div class="auth-screen">
+    <div class="auth-box" style="max-width:460px;">
+      <div class="auth-title" style="font-size:18px;margin-bottom:4px;">Create Operator Account</div>
+      <div class="auth-sub" style="margin-bottom:20px;">Register to access the SchemaSecure command platform</div>
+      <div class="aform-row">
+        <div><label class="a-label">First Name</label><input class="a-input" type="text" placeholder="John"/></div>
+        <div><label class="a-label">Last Name</label><input class="a-input" type="text" placeholder="Doe"/></div>
+      </div>
+      <label class="a-label">Email Address</label>
+      <input class="a-input" id="sgEmail" type="email" placeholder="officer@schemasecure.mil"/>
+      <div class="aform-row">
+        <div><label class="a-label">Password</label><input class="a-input" id="sgPass" type="password" placeholder="Min 8 chars"/></div>
+        <div><label class="a-label">Confirm</label><input class="a-input" id="sgPass2" type="password" placeholder="Repeat"/></div>
+      </div>
+      <div class="aform-row">
+        <div><label class="a-label">Access Level</label>
+          <select class="a-input"><option>Level 1 — Viewer</option><option>Level 2 — Operator</option><option selected>Level 3 — Supervisor</option><option>Level 4 — Admin</option></select>
+        </div>
+        <div><label class="a-label">Department</label>
+          <select class="a-input"><option>Physical Security</option><option>Cyber Security</option><option>Access Control</option><option>Command</option></select>
+        </div>
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--text3);cursor:pointer;margin-bottom:14px;"><input type="checkbox" style="accent-color:var(--accent);margin-top:1px;"/> I agree to the SchemaSecure Security Operations Agreement</label>
+      <button class="auth-btn" onclick="doSignup()">Create Secure Account</button>
+      <div class="auth-ok" id="sgOk">✔ ACCOUNT CREATED — REDIRECTING...</div>
+      <div class="auth-divider"><div class="auth-div-line"></div><div class="auth-div-txt">HAVE ACCOUNT?</div><div class="auth-div-line"></div></div>
+      <button class="auth-ghost" onclick="showScreen('screenLogin')">← Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DASHBOARD SCREEN
+═══════════════════════════════════════ -->
+<div class="screen" id="screenDash" style="flex-direction:column;">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-shield"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L1 4v4c0 3 2.4 5.5 6 6.5 3.6-1 6-3.5 6-6.5V4L7 1z" fill="var(--ink)"/></svg></div>
+      <div class="logo-text">SCHEMA<em>SECURE · COMMAND DIVISION</em></div>
+    </div>
+    <div class="topbar-center">
+      <div class="tnav active" onclick="switchTab(this,'tOverview')">Overview</div>
+      <div class="tnav" onclick="switchTab(this,'tCameras')">Cameras</div>
+      <div class="tnav" onclick="switchTab(this,'tAccess')">Access Log</div>
+      <div class="tnav" onclick="switchTab(this,'tDevices')">Devices</div>
+      <div class="tnav" onclick="switchTab(this,'tSettings')">Settings</div>
+      <div class="tnav" onclick="switchTab(this,'tProfile')">Profile</div>
+    </div>
+    <div class="topbar-right">
+      <div class="sys-status"><div class="sys-dot"></div>ONLINE</div>
+      <div class="clock-val" id="clockEl">00:00:00</div>
+      <button class="tbtn tbtn-ghost" onclick="openPrintReport()">🖨 Print Report</button>
+      <button class="tbtn tbtn-red" onclick="openOv('ovLogout')">⏏ Sign Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+  <div class="dash">
+
+  <!-- ═══ OVERVIEW TAB ═══ -->
+  <div class="tab-content active" id="tOverview">
+    <div class="ph">
+      <div class="ph-left">
+        <div class="ph-title">Security Overview</div>
+        <div class="ph-sub" id="dateEl">Loading...</div>
+      </div>
+      <div class="ph-actions">
+        <span style="background:rgba(61,220,132,0.1);border:1px solid rgba(61,220,132,0.25);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:11px;padding:5px 12px;border-radius:3px;">▲ THREAT LEVEL: LOW</span>
+        <button class="tbtn tbtn-ghost" onclick="openPrintReport()">🖨 Export</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat s-green">
+        <div class="stat-icon" style="background:rgba(61,220,132,0.1);"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="10" height="9" rx="1.5" stroke="#3ddc84" stroke-width="1.3"/><path d="M11 6l3-2v7l-3-2" stroke="#3ddc84" stroke-width="1.3"/></svg></div>
+        <div class="stat-num" style="color:var(--green);">18<span style="font-size:16px;color:var(--text3);">/20</span></div>
+        <div class="stat-label">Cameras Online</div>
+        <div class="stat-badge" style="background:rgba(61,220,132,0.1);color:var(--green);">2 offline</div>
+      </div>
+      <div class="stat s-gold">
+        <div class="stat-icon" style="background:rgba(200,168,75,0.1);"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1L1 4.5v4c0 3 2.5 5.7 6.5 6.5 4-0.8 6.5-3.5 6.5-6.5v-4L7.5 1z" stroke="#c8a84b" stroke-width="1.2" fill="none"/></svg></div>
+        <div class="stat-num" style="color:var(--accent2);">3</div>
+        <div class="stat-label">Active Alerts</div>
+        <div class="stat-badge" style="background:rgba(200,168,75,0.1);color:var(--accent2);">Review required</div>
+      </div>
+      <div class="stat s-blue">
+        <div class="stat-icon" style="background:rgba(56,189,248,0.1);"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="3" y="7" width="9" height="7" rx="1.2" stroke="#38bdf8" stroke-width="1.3"/><path d="M5 7V5a2.5 2.5 0 015 0v2" stroke="#38bdf8" stroke-width="1.3"/></svg></div>
+        <div class="stat-num" style="color:var(--blue);">147</div>
+        <div class="stat-label">Access Events</div>
+        <div class="stat-badge" style="background:rgba(56,189,248,0.1);color:var(--blue);">4 denied today</div>
+      </div>
+      <div class="stat s-green">
+        <div class="stat-icon" style="background:rgba(61,220,132,0.1);"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5L2 4v5c0 3.5 2.5 6.5 5.5 7.5 3-1 5.5-4 5.5-7.5V4L7.5 1.5z" stroke="#3ddc84" stroke-width="1.2" fill="none"/></svg></div>
+        <div class="stat-num" style="color:var(--green);">99.9<span style="font-size:16px;">%</span></div>
+        <div class="stat-label">System Uptime</div>
+        <div class="stat-badge" style="background:rgba(61,220,132,0.1);color:var(--green);">42d 7h stable</div>
+      </div>
+    </div>
+
+    <div class="grid-main">
+      <!-- CAMERAS -->
+      <div class="panel">
+        <div class="panel-hd">
+          <div class="panel-title">◉ Live Surveillance Feeds</div>
+          <div class="panel-actions">
+            <button class="tbtn tbtn-gold" style="font-size:10px;padding:4px 10px;" onclick="requestWebcam()">📷 Connect Camera</button>
+          </div>
+        </div>
+        <div id="camNotice" class="cam-notice">▶ Click "Connect Camera" to link your PC webcam to live feed slots.</div>
+        <div class="cam-grid">
+          <!-- CAM 01 -->
+          <div class="cam-wrap cam-live" id="cam01wrap">
+            <div id="cam01ph" class="cam-offline-placeholder">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="6" width="18" height="16" rx="2.5" stroke="var(--text3)" stroke-width="1.5"/><path d="M20 11l7-4v14l-7-4" stroke="var(--text3)" stroke-width="1.5"/></svg>
+              <span style="font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;letter-spacing:0.08em;">AWAITING FEED</span>
+            </div>
+            <video id="vid01" autoplay muted playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+            <div class="cam-scanline"></div>
+            <div class="cam-overlay"></div>
+            <div class="cam-corners"></div>
+            <div class="cam-top-bar"><span class="cam-id">CAM-01</span><span style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--accent);" id="ts01">--:--:--</span></div>
+            <div class="cam-bar">
+              <span class="cam-name">MAIN ENTRANCE · SECTOR A</span>
+              <span class="cam-live-badge" id="badge01"><div class="rec-dot" style="background:var(--text3);"></div><span style="color:var(--text3);">OFFLINE</span></span>
+            </div>
+          </div>
+          <!-- CAM 02 -->
+          <div class="cam-wrap cam-live" id="cam02wrap">
+            <div id="cam02ph" class="cam-offline-placeholder">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="6" width="18" height="16" rx="2.5" stroke="var(--text3)" stroke-width="1.5"/><path d="M20 11l7-4v14l-7-4" stroke="var(--text3)" stroke-width="1.5"/></svg>
+              <span style="font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;">AWAITING FEED</span>
+            </div>
+            <video id="vid02" autoplay muted playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+            <div class="cam-scanline" style="animation-delay:1s;"></div>
+            <div class="cam-overlay"></div>
+            <div class="cam-corners"></div>
+            <div class="cam-top-bar"><span class="cam-id">CAM-02</span><span style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--accent);" id="ts02">--:--:--</span></div>
+            <div class="cam-bar">
+              <span class="cam-name">PARKING · SECTOR B</span>
+              <span class="cam-live-badge" id="badge02"><div class="rec-dot" style="background:var(--text3);"></div><span style="color:var(--text3);">OFFLINE</span></span>
+            </div>
+          </div>
+          <!-- CAM 03 OFFLINE -->
+          <div class="cam-wrap cam-err">
+            <div class="cam-offline-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M9 5H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V9" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span style="font-size:9px;color:var(--red);font-family:'Share Tech Mono',monospace;">SIGNAL LOST</span>
+              <span style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;">RECONNECTING...</span>
+            </div>
+            <div class="cam-corners" style="--accent:var(--red);"></div>
+            <div class="cam-top-bar"><span class="cam-id" style="color:var(--red);">CAM-03</span></div>
+            <div class="cam-bar"><span class="cam-name" style="color:rgba(240,64,64,0.7);">SIDE GATE · SECTOR C</span><span class="cam-live-badge"><div class="rec-dot" style="background:var(--red);"></div><span style="color:var(--red);">ERROR</span></span></div>
+          </div>
+          <!-- CAM 04 -->
+          <div class="cam-wrap cam-live" id="cam04wrap">
+            <div id="cam04ph" class="cam-offline-placeholder">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="2" y="6" width="18" height="16" rx="2.5" stroke="var(--text3)" stroke-width="1.5"/><path d="M20 11l7-4v14l-7-4" stroke="var(--text3)" stroke-width="1.5"/></svg>
+              <span style="font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;">AWAITING FEED</span>
+            </div>
+            <video id="vid04" autoplay muted playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+            <div class="cam-scanline" style="animation-delay:2s;"></div>
+            <div class="cam-overlay"></div>
+            <div class="cam-corners"></div>
+            <div class="cam-top-bar"><span class="cam-id">CAM-04</span><span style="font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--accent);" id="ts04">--:--:--</span></div>
+            <div class="cam-bar">
+              <span class="cam-name">SERVER ROOM · SECTOR D</span>
+              <span class="cam-live-badge" id="badge04"><div class="rec-dot" style="background:var(--text3);"></div><span style="color:var(--text3);">OFFLINE</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <!-- ALERTS -->
+        <div class="panel">
+          <div class="panel-hd">
+            <div class="panel-title">⚡ Active Alerts</div>
+            <button class="mini-btn mini-btn-print" onclick="printSection('alerts')">🖨</button>
+          </div>
+          <div id="alertList">
+            <div class="alert-item" data-id="A001">
+              <div class="alert-sev" style="background:var(--red);"></div>
+              <div style="flex:1;">
+                <div class="alert-msg">Unauthorized access attempt — Gate B</div>
+                <div class="alert-meta">ZONE-3 · Badge #ERR · 13:38:22</div>
+                <div class="alert-actions">
+                  <button class="mini-btn mini-btn-edit" onclick="openEdit('Gate B Intrusion','Zone 3','Level 4','Denied')">✏ Edit</button>
+                  <button class="mini-btn mini-btn-del" onclick="openDelete('Alert A001 — Gate B Intrusion')">🗑 Delete</button>
+                  <button class="mini-btn mini-btn-print" onclick="printItem('Alert A001','Unauthorized access at Gate B, Zone 3')">🖨</button>
+                </div>
+              </div>
+              <div class="alert-time">13:38</div>
+            </div>
+            <div class="alert-item" data-id="A002">
+              <div class="alert-sev" style="background:var(--orange);"></div>
+              <div style="flex:1;">
+                <div class="alert-msg">Camera CAM-03 signal lost</div>
+                <div class="alert-meta">SIDE GATE · Auto-reconnecting · 13:40:01</div>
+                <div class="alert-actions">
+                  <button class="mini-btn mini-btn-edit" onclick="openEdit('CAM-03 Signal Loss','Side Gate','Level 2','Pending')">✏ Edit</button>
+                  <button class="mini-btn mini-btn-del" onclick="openDelete('Alert A002 — CAM-03 Signal Loss')">🗑 Delete</button>
+                  <button class="mini-btn mini-btn-print" onclick="printItem('Alert A002','CAM-03 signal lost at Side Gate')">🖨</button>
+                </div>
+              </div>
+              <div class="alert-time">13:40</div>
+            </div>
+            <div class="alert-item" data-id="A003">
+              <div class="alert-sev" style="background:var(--accent);"></div>
+              <div style="flex:1;">
+                <div class="alert-msg">Visitor badge expired — Lobby</div>
+                <div class="alert-meta">LOBBY · Badge #V-042 · Pending review</div>
+                <div class="alert-actions">
+                  <button class="mini-btn mini-btn-edit" onclick="openEdit('Visitor #V-042','Lobby','Level 1','Pending')">✏ Edit</button>
+                  <button class="mini-btn mini-btn-del" onclick="openDelete('Alert A003 — Visitor Badge #V-042')">🗑 Delete</button>
+                  <button class="mini-btn mini-btn-print" onclick="printItem('Alert A003','Visitor badge V-042 expired in Lobby')">🖨</button>
+                </div>
+              </div>
+              <div class="alert-time">13:41</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONE MAP -->
+        <div class="panel">
+          <div class="panel-hd"><div class="panel-title">◈ Zone Status</div></div>
+          <svg class="zone-map" viewBox="0 0 200 120" role="img">
+            <rect width="200" height="120" fill="#090d14"/>
+            <rect x="6" y="6" width="88" height="50" rx="3" fill="rgba(61,220,132,0.06)" stroke="rgba(61,220,132,0.3)" stroke-width="1"/>
+            <text x="50" y="27" text-anchor="middle" font-size="7" fill="#3ddc84" font-family="Share Tech Mono,monospace" font-weight="700">LOBBY</text>
+            <text x="50" y="38" text-anchor="middle" font-size="6" fill="rgba(61,220,132,0.5)" font-family="Share Tech Mono,monospace">● SECURE</text>
+            <rect x="104" y="6" width="90" height="50" rx="3" fill="rgba(249,115,22,0.06)" stroke="rgba(249,115,22,0.35)" stroke-width="1"/>
+            <text x="149" y="27" text-anchor="middle" font-size="7" fill="#f97316" font-family="Share Tech Mono,monospace" font-weight="700">GATE B</text>
+            <text x="149" y="38" text-anchor="middle" font-size="6" fill="rgba(249,115,22,0.6)" font-family="Share Tech Mono,monospace">⚠ ALERT</text>
+            <rect x="6" y="66" width="88" height="48" rx="3" fill="rgba(56,189,248,0.05)" stroke="rgba(56,189,248,0.25)" stroke-width="1"/>
+            <text x="50" y="87" text-anchor="middle" font-size="7" fill="#38bdf8" font-family="Share Tech Mono,monospace" font-weight="700">SERVER RM</text>
+            <text x="50" y="98" text-anchor="middle" font-size="6" fill="rgba(56,189,248,0.5)" font-family="Share Tech Mono,monospace">● MONITORED</text>
+            <rect x="104" y="66" width="90" height="48" rx="3" fill="rgba(240,64,64,0.05)" stroke="rgba(240,64,64,0.25)" stroke-width="1"/>
+            <text x="149" y="87" text-anchor="middle" font-size="7" fill="#f04040" font-family="Share Tech Mono,monospace" font-weight="700">SIDE GATE</text>
+            <text x="149" y="98" text-anchor="middle" font-size="6" fill="rgba(240,64,64,0.5)" font-family="Share Tech Mono,monospace">✕ CAM OFFLINE</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-bottom">
+      <!-- DEVICES -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">◌ Devices</div><button class="mini-btn mini-btn-print" onclick="printSection('devices')">🖨</button></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Camera Array</div><div class="dev-right"><span class="dev-status ds-ok">18/20 ONLINE</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Camera Array','All Sectors','Level 3','Granted')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Access Points</div><div class="dev-right"><span class="dev-status ds-ok">ALL ONLINE</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Access Points','All Gates','Level 4','Granted')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Alarm System</div><div class="dev-right"><span class="dev-status ds-ok">ARMED</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Alarm System','Base Wide','Level 4','Granted')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--accent);"></div>Backup Power</div><div class="dev-right"><span class="dev-status ds-warn">CHARGING</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Backup Power','Generator Bay','Level 3','Pending')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Firewall</div><div class="dev-right"><span class="dev-status ds-ok">ACTIVE</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Firewall','Network Core','Level 4','Granted')">✏</button></div></div>
+      </div>
+      <!-- ACTIVITY CHART -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">◈ Access Activity</div><span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);">LAST 7H</span></div>
+        <div class="bar-wrap">
+          <div class="bar" style="height:38%;background:rgba(200,168,75,0.25);"></div>
+          <div class="bar" style="height:62%;background:rgba(200,168,75,0.35);"></div>
+          <div class="bar" style="height:80%;background:rgba(200,168,75,0.45);"></div>
+          <div class="bar" style="height:52%;background:rgba(200,168,75,0.35);"></div>
+          <div class="bar" style="height:92%;background:rgba(61,220,132,0.5);"></div>
+          <div class="bar" style="height:70%;background:rgba(200,168,75,0.4);"></div>
+          <div class="bar" style="height:100%;background:var(--accent2);"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;"><span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);">07:00</span><span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);">NOW</span></div>
+      </div>
+      <!-- QUICK ACTIONS -->
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">⚙ Quick Actions</div></div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <button class="tbtn tbtn-ghost" style="width:100%;padding:9px;font-size:11px;text-align:left;" onclick="openOv('ovAdd')">+ Add Access Record</button>
+          <button class="tbtn tbtn-ghost" style="width:100%;padding:9px;font-size:11px;text-align:left;" onclick="requestWebcam()">📷 Connect PC Camera</button>
+          <button class="tbtn tbtn-ghost" style="width:100%;padding:9px;font-size:11px;text-align:left;" onclick="openPrintReport()">🖨 Print Full Report</button>
+          <button style="width:100%;padding:9px;font-size:11px;text-align:left;background:rgba(240,64,64,0.08);border:1px solid rgba(240,64,64,0.2);color:var(--red);border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;" onclick="alert('🚨 FULL LOCKDOWN INITIATED — All access points secured!')">🚨 Emergency Lockdown</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CAMERAS TAB ═══ -->
+  <div class="tab-content" id="tCameras">
+    <div class="ph">
+      <div class="ph-left"><div class="ph-title">Surveillance Cameras</div><div class="ph-sub">6 FEEDS · 5 ONLINE · 1 OFFLINE</div></div>
+      <div class="ph-actions">
+        <button class="tbtn tbtn-gold" onclick="requestWebcam()">📷 Connect My Camera</button>
+        <button class="tbtn tbtn-ghost" onclick="openPrintReport()">🖨 Print</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <!-- Each camera slot mirrors webcam -->
+      <div class="cam-wrap cam-live" id="camC01wrap" style="aspect-ratio:16/9;">
+        <div id="camC01ph" class="cam-offline-placeholder"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="14" height="12" rx="2" stroke="var(--text3)" stroke-width="1.5"/><path d="M16 9l5-3v10l-5-3" stroke="var(--text3)" stroke-width="1.5"/></svg><span style="font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;">OFFLINE</span></div>
+        <video id="vidC01" autoplay muted playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+        <div class="cam-scanline"></div><div class="cam-overlay"></div><div class="cam-corners"></div>
+        <div class="cam-top-bar"><span class="cam-id">CAM-01</span></div>
+        <div class="cam-bar"><span class="cam-name">MAIN ENTRANCE</span><span class="cam-live-badge" id="badgeC01"><div class="rec-dot" style="background:var(--text3);"></div><span style="color:var(--text3);">OFFLINE</span></span></div>
+      </div>
+      <div class="cam-wrap" style="aspect-ratio:16/9;"><div class="cam-offline-placeholder" style="background:radial-gradient(ellipse at center,#0d1a10,#050810);"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="14" height="12" rx="2" stroke="var(--green)" stroke-width="1.5" opacity="0.5"/><path d="M16 9l5-3v10l-5-3" stroke="var(--green)" stroke-width="1.5" opacity="0.5"/></svg><span style="font-size:8px;color:var(--green);font-family:'Share Tech Mono',monospace;opacity:0.6;">LIVE FEED</span></div><div class="cam-scanline"></div><div class="cam-overlay"></div><div class="cam-corners"></div><div class="cam-top-bar"><span class="cam-id">CAM-02</span></div><div class="cam-bar"><span class="cam-name">PARKING LOT</span><span class="cam-live-badge"><div class="rec-dot" style="background:var(--green);"></div><span style="color:var(--green);">LIVE</span></span></div></div>
+      <div class="cam-wrap cam-err" style="aspect-ratio:16/9;"><div class="cam-offline-placeholder"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 3l16 16M9 5H5a2 2 0 00-2 2v10" stroke="var(--red)" stroke-width="1.5" stroke-linecap="round"/></svg><span style="font-size:9px;color:var(--red);font-family:'Share Tech Mono',monospace;">SIGNAL LOST</span></div><div class="cam-corners" style="--accent:var(--red);"></div><div class="cam-top-bar"><span class="cam-id" style="color:var(--red);">CAM-03</span></div><div class="cam-bar"><span class="cam-name" style="color:rgba(240,64,64,0.6);">SIDE GATE</span><span class="cam-live-badge"><div class="rec-dot" style="background:var(--red);"></div><span style="color:var(--red);">ERROR</span></span></div></div>
+      <div class="cam-wrap cam-live" id="camC04wrap" style="aspect-ratio:16/9;">
+        <div id="camC04ph" class="cam-offline-placeholder"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="14" height="12" rx="2" stroke="var(--text3)" stroke-width="1.5"/><path d="M16 9l5-3v10l-5-3" stroke="var(--text3)" stroke-width="1.5"/></svg><span style="font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;">OFFLINE</span></div>
+        <video id="vidC04" autoplay muted playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+        <div class="cam-scanline" style="animation-delay:1.5s;"></div><div class="cam-overlay"></div><div class="cam-corners"></div>
+        <div class="cam-top-bar"><span class="cam-id">CAM-04</span></div>
+        <div class="cam-bar"><span class="cam-name">SERVER ROOM</span><span class="cam-live-badge" id="badgeC04"><div class="rec-dot" style="background:var(--text3);"></div><span style="color:var(--text3);">OFFLINE</span></span></div>
+      </div>
+      <div class="cam-wrap" style="aspect-ratio:16/9;"><div class="cam-offline-placeholder" style="background:radial-gradient(ellipse at center,#0d1520,#050810);"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="14" height="12" rx="2" stroke="var(--blue)" stroke-width="1.5" opacity="0.5"/></svg><span style="font-size:8px;color:var(--blue);font-family:'Share Tech Mono',monospace;opacity:0.6;">LIVE FEED</span></div><div class="cam-scanline"></div><div class="cam-overlay"></div><div class="cam-corners"></div><div class="cam-top-bar"><span class="cam-id">CAM-05</span></div><div class="cam-bar"><span class="cam-name">ROOFTOP</span><span class="cam-live-badge"><div class="rec-dot" style="background:var(--green);"></div><span style="color:var(--green);">LIVE</span></span></div></div>
+      <div class="cam-wrap cam-live" id="camC06wrap" style="aspect-ratio:16/9;">
+        <div id="camC06ph" class="cam-offline-placeholder"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="5" width="14" height="12" rx="2" stroke="var(--text3)" stroke-width="1.5"/><path d="M16 9l5-3v10l-5-3" stroke="var(--text3)" stroke-width="1.5"/></svg><span style="font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace;">OFFLINE</span></div>
+        <video id="vidC06" autoplay muted playsinline style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+        <div class="cam-scanline" style="animation-delay:2.5s;"></div><div class="cam-overlay"></div><div class="cam-corners"></div>
+        <div class="cam-top-bar"><span class="cam-id">CAM-06</span></div>
+        <div class="cam-bar"><span class="cam-name">LOBBY ENTRANCE</span><span class="cam-live-badge" id="badgeC06"><div class="rec-dot" style="background:var(--text3);"></div><span style="color:var(--text3);">OFFLINE</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ACCESS LOG TAB ═══ -->
+  <div class="tab-content" id="tAccess">
+    <div class="ph">
+      <div class="ph-left"><div class="ph-title">Access Control Log</div><div class="ph-sub" id="accessCount">LOADED 7 RECORDS</div></div>
+      <div class="ph-actions">
+        <button class="tbtn tbtn-gold" onclick="openOv('ovAdd')">+ Add Record</button>
+        <button class="tbtn tbtn-ghost" onclick="openPrintReport()">🖨 Print Log</button>
+      </div>
+    </div>
+    <div class="panel">
+      <table class="log-table" id="accessTable">
+        <thead>
+          <tr>
+            <th>STATUS</th><th>NAME / ID</th><th>ZONE / DOOR</th>
+            <th>LEVEL</th><th>TIME</th><th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="accessTbody">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ DEVICES TAB ═══ -->
+  <div class="tab-content" id="tDevices">
+    <div class="ph">
+      <div class="ph-left"><div class="ph-title">Device Management</div><div class="ph-sub">6 DEVICES · 5 ONLINE</div></div>
+      <div class="ph-actions">
+        <button class="tbtn tbtn-ghost" onclick="openPrintReport()">🖨 Print</button>
+      </div>
+    </div>
+    <div class="grid-full">
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">◌ Hardware Status</div></div>
+        <div id="deviceList">
+          <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Camera Array (18/20)</div><div class="dev-right"><span class="dev-status ds-ok">ONLINE</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Camera Array','All Sectors','Level 3','Granted')">✏</button><button class="mini-btn mini-btn-del" onclick="openDelete('Device — Camera Array')">🗑</button><button class="mini-btn mini-btn-print" onclick="printItem('Camera Array','18 of 20 cameras online across all sectors')">🖨</button></div></div>
+          <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Access Control Points</div><div class="dev-right"><span class="dev-status ds-ok">ONLINE</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Access Points','All Gates','Level 4','Granted')">✏</button><button class="mini-btn mini-btn-del" onclick="openDelete('Device — Access Control Points')">🗑</button><button class="mini-btn mini-btn-print" onclick="printItem('Access Points','All control points online and operational')">🖨</button></div></div>
+          <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Perimeter Alarm</div><div class="dev-right"><span class="dev-status ds-ok">ARMED</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Perimeter Alarm','Base Perimeter','Level 4','Granted')">✏</button><button class="mini-btn mini-btn-del" onclick="openDelete('Device — Perimeter Alarm')">🗑</button><button class="mini-btn mini-btn-print" onclick="printItem('Perimeter Alarm','Armed and operational on base perimeter')">🖨</button></div></div>
+          <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Network Firewall</div><div class="dev-right"><span class="dev-status ds-ok">ACTIVE</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Firewall','Network Core','Level 4','Granted')">✏</button><button class="mini-btn mini-btn-del" onclick="openDelete('Device — Network Firewall')">🗑</button><button class="mini-btn mini-btn-print" onclick="printItem('Network Firewall','Active with no intrusion attempts detected')">🖨</button></div></div>
+          <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--accent);"></div>Backup Power Gen.</div><div class="dev-right"><span class="dev-status ds-warn">CHARGING</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Backup Power','Generator Bay','Level 3','Pending')">✏</button><button class="mini-btn mini-btn-del" onclick="openDelete('Device — Backup Generator')">🗑</button><button class="mini-btn mini-btn-print" onclick="printItem('Backup Generator','Currently charging — estimated full in 2h')">🖨</button></div></div>
+          <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--red);"></div>CAM-03 Side Gate</div><div class="dev-right"><span class="dev-status ds-err">OFFLINE</span><button class="mini-btn mini-btn-edit" onclick="openEdit('CAM-03','Side Gate C','Level 2','Denied')">✏</button><button class="mini-btn mini-btn-del" onclick="openDelete('Device — CAM-03 Side Gate')">🗑</button><button class="mini-btn mini-btn-print" onclick="printItem('CAM-03','Signal lost — maintenance required at Side Gate C')">🖨</button></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">🚪 Door Control</div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Main Entrance</div><div class="dev-right"><span class="dev-status ds-ok">UNLOCKED</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Main Entrance','Sector A','Level 2','Granted')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--green);"></div>Gate A</div><div class="dev-right"><span class="dev-status ds-ok">UNLOCKED</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Gate A','Sector A','Level 3','Granted')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--orange);"></div>Gate B</div><div class="dev-right"><span class="dev-status ds-warn">⚠ ALERT</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Gate B','Sector B','Level 4','Denied')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--blue);"></div>Server Room</div><div class="dev-right"><span class="dev-status" style="background:rgba(56,189,248,0.08);color:var(--blue);border:1px solid rgba(56,189,248,0.15);">LOCKED</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Server Room','Sector D','Level 4','Granted')">✏</button></div></div>
+        <div class="dev-row"><div class="dev-name"><div class="dev-dot" style="background:var(--blue);"></div>Rooftop Access</div><div class="dev-right"><span class="dev-status" style="background:rgba(56,189,248,0.08);color:var(--blue);border:1px solid rgba(56,189,248,0.15);">LOCKED</span><button class="mini-btn mini-btn-edit" onclick="openEdit('Rooftop','Top Level','Level 4','Granted')">✏</button></div></div>
+        <div style="margin-top:12px;">
+          <button style="width:100%;padding:10px;background:rgba(240,64,64,0.1);border:1px solid rgba(240,64,64,0.25);color:var(--red);border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;" onclick="alert('🚨 LOCKDOWN INITIATED')">🚨 Emergency Lockdown</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SETTINGS TAB ═══ -->
+  <div class="tab-content" id="tSettings">
+    <div class="ph">
+      <div class="ph-left"><div class="ph-title">System Configuration</div></div>
+      <div class="ph-actions"><button class="tbtn tbtn-ghost" onclick="openPrintReport()">🖨 Print Config</button></div>
+    </div>
+    <div class="grid-full">
+      <div class="panel">
+        <div class="sec-label">Notifications</div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Motion Detection Alerts</div><div class="ts">Trigger alert on any movement detected</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Unauthorized Access Alerts</div><div class="ts">Notify on all denied entries</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Camera Offline Alerts</div><div class="ts">Alert when any feed is lost</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Daily Command Report</div><div class="ts">Summary delivered to admin email</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+        <div class="sec-label" style="margin-top:14px;">Recording</div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Continuous 24/7 Recording</div><div class="ts">All cameras always recording</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Motion-Only Recording</div><div class="ts">Conserve storage resources</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Secure Cloud Backup</div><div class="ts">Auto-upload encrypted footage</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+      <div class="panel">
+        <div class="sec-label">Security Protocols</div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Two-Factor Authentication</div><div class="ts">Mandatory for all operators</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Session Auto-Lock</div><div class="ts">Lock after 15 min inactivity</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Perimeter Alarm</div><div class="ts">Outdoor motion sensor network</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">AI Threat Detection</div><div class="ts">CoreShield™ ML engine active</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="sec-label" style="margin-top:14px;">System</div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Night Vision Mode</div><div class="ts">IR auto-switch at dusk</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Maintenance Mode</div><div class="ts">Suppress alerts during service</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+        <div class="tog-row"><div class="tog-info"><div class="tl">Encrypted Audit Trail</div><div class="ts">Immutable tamper-proof logs</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROFILE TAB ═══ -->
+  <div class="tab-content" id="tProfile">
+    <div class="ph">
+      <div class="ph-left"><div class="ph-title">Operator Profile</div></div>
+      <div class="ph-actions">
+        <button class="tbtn tbtn-ghost" onclick="openEdit('Admin Operator','Command HQ','Level 4','Granted')">✏ Edit Profile</button>
+        <button class="tbtn tbtn-ghost" onclick="openPrintReport()">🖨 Print</button>
+        <button class="tbtn tbtn-red" onclick="openOv('ovLogout')">⏏ Sign Out</button>
+      </div>
+    </div>
+    <div class="grid-full">
+      <div>
+        <div class="panel" style="margin-bottom:10px;">
+          <div class="profile-hero">
+            <div class="avatar-ring" id="profAvatar">AD</div>
+            <div class="pro-name" id="profName">Admin Operator</div>
+            <div class="pro-role">SECURITY ADMINISTRATOR · LEVEL 4 · COMMAND DIVISION</div>
+            <div class="badge-row">
+              <div class="pro-badge">ISO 27001</div>
+              <div class="pro-badge">FULL ACCESS</div>
+              <div class="pro-badge">ACTIVE DUTY</div>
+              <div class="pro-badge">CLASSIFIED</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><div class="panel-title">◈ Account Details</div></div>
+          <div class="detail-row"><span class="detail-label">Email</span><span class="detail-val" id="profEmail">admin@schemasecure.mil</span></div>
+          <div class="detail-row"><span class="detail-label">Department</span><span class="detail-val">Security Operations Command</span></div>
+          <div class="detail-row"><span class="detail-label">Clearance</span><span class="detail-val" style="color:var(--accent2);">TOP SECRET</span></div>
+          <div class="detail-row"><span class="detail-label">Last Login</span><span class="detail-val">Today · 08:02:14</span></div>
+          <div class="detail-row"><span class="detail-label">Sessions</span><span class="detail-val">1 active device</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hd"><div class="panel-title">◉ Security Activity</div></div>
+        <div class="detail-row"><span class="tag tag-ok" style="margin-right:10px;">LOGIN</span><span class="detail-val">Successful authentication</span><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-left:auto;">Now</span></div>
+        <div class="detail-row"><span class="tag tag-ok" style="margin-right:10px;">ACTION</span><span class="detail-val">Camera feeds reviewed</span><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-left:auto;">13:42</span></div>
+        <div class="detail-row"><span class="tag tag-pend" style="margin-right:10px;">REVIEW</span><span class="detail-val">Alert A001 acknowledged</span><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-left:auto;">13:39</span></div>
+        <div class="detail-row"><span class="tag tag-ok" style="margin-right:10px;">LOGIN</span><span class="detail-val">Previous session</span><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);margin-left:auto;">Yesterday</span></div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px;">
+          <button class="tbtn tbtn-ghost" style="width:100%;padding:9px;">🔑 Change Password</button>
+          <button class="tbtn tbtn-ghost" style="width:100%;padding:9px;" onclick="openEdit(document.getElementById('profName').textContent,'Command HQ','Level 4','Granted')">✏ Edit Profile</button>
+          <button class="tbtn tbtn-red" style="width:100%;padding:9px;" onclick="openOv('ovLogout')">⏏ Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end dash -->
+  </div><!-- end main -->
+</div><!-- end screenDash -->
+
+<script>
+// ═══════════ DATA ═══════════
+let accessRecords = [
+  {id:'R001',status:'Granted',name:'Amara Ibrahim',zone:'Main Door · Sector A',level:'Level 3',time:'13:41:02'},
+  {id:'R002',status:'Denied',name:'Unknown · Badge #ERR',zone:'Gate B · Sector B',level:'Level 0',time:'13:38:22'},
+  {id:'R003',status:'Granted',name:'Sara Chen',zone:'Server Room · Sector D',level:'Level 4',time:'13:35:11'},
+  {id:'R004',status:'Pending',name:'Visitor #V-042',zone:'Lobby · Front Desk',level:'Level 1',time:'13:33:40'},
+  {id:'R005',status:'Granted',name:'Marcus Reid',zone:'Gate A · Sector A',level:'Level 3',time:'13:20:05'},
+  {id:'R006',status:'Granted',name:'David Kane',zone:'Main Door · Sector A',level:'Level 4',time:'08:02:18'},
+  {id:'R007',status:'Denied',name:'Unknown Intruder',zone:'Gate B · Sector B',level:'Level 0',time:'07:54:44'},
+];
+let deleteTarget = '';
+let webcamStream = null;
+
+// ═══════════ SCREEN ═══════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════ AUTH ═══════════
+function doLogin(){
+  const email=document.getElementById('lgEmail').value.trim();
+  const pass=document.getElementById('lgPass').value;
+  const err=document.getElementById('lgErr');
+  if(!email||!pass){err.style.display='block';return;}
+  err.style.display='none';
+  const name=email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  document.getElementById('profEmail').textContent=email;
+  document.getElementById('profName').textContent=name;
+  document.getElementById('profAvatar').textContent=name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+  renderAccessTable();
+  showScreen('screenDash');
+}
+function doSignup(){
+  const email=document.getElementById('sgEmail').value;
+  const pass=document.getElementById('sgPass').value;
+  const pass2=document.getElementById('sgPass2').value;
+  if(!email||!pass||pass!==pass2){alert('Fill all fields and ensure passwords match.');return;}
+  const ok=document.getElementById('sgOk');
+  ok.style.display='block';
+  setTimeout(()=>{ok.style.display='none';showScreen('screenLogin');},2000);
+}
+function doLogout(){
+  closeOv('ovLogout');
+  if(webcamStream){webcamStream.getTracks().forEach(t=>t.stop());webcamStream=null;}
+  showScreen('screenLogin');
+  document.getElementById('lgEmail').value='';
+  document.getElementById('lgPass').value='';
+}
+
+// ═══════════ TABS ═══════════
+function switchTab(el,tabId){
+  document.querySelectorAll('.tnav').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ═══════════ OVERLAYS ═══════════
+function openOv(id){document.getElementById(id).classList.add('show');}
+function closeOv(id){document.getElementById(id).classList.remove('show');}
+
+// ═══════════ EDIT ═══════════
+function openEdit(name,zone,level,status){
+  document.getElementById('editName').value=name||'';
+  document.getElementById('editZone').value=zone||'';
+  document.getElementById('editLevel').value=level||'Level 1 — Viewer';
+  document.getElementById('editStatus').value=status||'Granted';
+  openOv('ovEdit');
+}
+function saveEdit(){
+  const name=document.getElementById('editName').value;
+  const zone=document.getElementById('editZone').value;
+  closeOv('ovEdit');
+  const toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:20px;right:20px;background:#1e2736;border:1px solid rgba(200,168,75,0.3);color:#c8a84b;font-family:Share Tech Mono,monospace;font-size:11px;padding:10px 16px;border-radius:4px;z-index:500;animation:fadeIn 0.3s ease;';
+  toast.textContent='✓ Record updated: '+name;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2500);
+  renderAccessTable();
+}
+
+// ═══════════ DELETE ═══════════
+function openDelete(target){
+  deleteTarget=target;
+  document.getElementById('deleteTarget').textContent=target;
+  openOv('ovDelete');
+}
+function confirmDelete(){
+  closeOv('ovDelete');
+  const toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:20px;right:20px;background:#1e2736;border:1px solid rgba(240,64,64,0.3);color:#f04040;font-family:Share Tech Mono,monospace;font-size:11px;padding:10px 16px;border-radius:4px;z-index:500;';
+  toast.textContent='🗑 Deleted: '+deleteTarget;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2500);
+}
+
+// ═══════════ ADD RECORD ═══════════
+function addRecord(){
+  const name=document.getElementById('addName').value||'Unknown Operator';
+  const badge=document.getElementById('addBadge').value||'#B-0000';
+  const zone=document.getElementById('addZone').value||'Main Entrance';
+  const level=document.getElementById('addLevel').value||'Level 1';
+  const status=document.getElementById('addStatus').value||'Granted';
+  const id='R'+(100+accessRecords.length+1);
+  const now=new Date();
+  const time=now.toLocaleTimeString('en-US',{hour12:false});
+  accessRecords.unshift({id,status,name:name+' '+badge,zone,level,time});
+  document.getElementById('accessCount').textContent='LOADED '+accessRecords.length+' RECORDS';
+  closeOv('ovAdd');
+  renderAccessTable();
+  const toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:20px;right:20px;background:#1e2736;border:1px solid rgba(61,220,132,0.3);color:#3ddc84;font-family:Share Tech Mono,monospace;font-size:11px;padding:10px 16px;border-radius:4px;z-index:500;';
+  toast.textContent='✓ Record added: '+name;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2500);
+}
+
+// ═══════════ RENDER TABLE ═══════════
+function tagClass(s){
+  if(s==='Granted')return'tag-ok';
+  if(s==='Denied')return'tag-deny';
+  return'tag-pend';
+}
+function renderAccessTable(){
+  const tbody=document.getElementById('accessTbody');
+  tbody.innerHTML=accessRecords.map((r,i)=>`
+    <tr>
+      <td><span class="tag ${tagClass(r.status)}">${r.status.toUpperCase()}</span></td>
+      <td style="font-weight:500;">${r.name}</td>
+      <td style="color:var(--text2);">${r.zone}</td>
+      <td><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);">${r.level}</span></td>
+      <td><span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);">${r.time}</span></td>
+      <td><div class="act-btns">
+        <button class="mini-btn mini-btn-edit" onclick="openEdit('${r.name}','${r.zone}','${r.level}','${r.status}')">✏ Edit</button>
+        <button class="mini-btn mini-btn-del" onclick="deleteRecord(${i})">🗑 Del</button>
+        <button class="mini-btn mini-btn-print" onclick="printItem('${r.id}','${r.name} — ${r.zone} — ${r.status}')">🖨</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+function deleteRecord(i){
+  const r=accessRecords[i];
+  openDelete('Record '+r.id+' — '+r.name);
+  document.getElementById('ovDelete').dataset.idx=i;
+}
+// Override confirmDelete to also remove from array
+const _origConfirmDelete=confirmDelete;
+window.confirmDelete=function(){
+  const idx=document.getElementById('ovDelete').dataset.idx;
+  if(idx!==undefined){
+    accessRecords.splice(parseInt(idx),1);
+    document.getElementById('accessCount').textContent='LOADED '+accessRecords.length+' RECORDS';
+    renderAccessTable();
+    delete document.getElementById('ovDelete').dataset.idx;
+  }
+  closeOv('ovDelete');
+  const toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:20px;right:20px;background:#1e2736;border:1px solid rgba(240,64,64,0.3);color:#f04040;font-family:Share Tech Mono,monospace;font-size:11px;padding:10px 16px;border-radius:4px;z-index:500;';
+  toast.textContent='🗑 Record deleted';
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2500);
+};
+
+// ═══════════ PRINT ═══════════
+function printItem(id,detail){
+  const now=new Date().toLocaleString();
+  document.getElementById('printPreviewBody').innerHTML=
+    `SCHEMASECURE — COMMAND DIVISION\n` +
+    `${'═'.repeat(40)}\n` +
+    `RECORD: ${id}\n` +
+    `DETAIL: ${detail}\n` +
+    `PRINTED BY: ${document.getElementById('profName').textContent}\n` +
+    `DATE/TIME: ${now}\n` +
+    `CLASSIFICATION: RESTRICTED\n` +
+    `${'═'.repeat(40)}\n\n` +
+    `[Signature] ___________________\n` +
+    `[Authorized by] _______________`;
+  openOv('ovPrint');
+}
+function printSection(section){
+  const now=new Date().toLocaleString();
+  let content='';
+  if(section==='alerts'){
+    content='ACTIVE ALERTS REPORT\n'+'─'.repeat(30)+'\n';
+    document.querySelectorAll('#alertList .alert-item').forEach((item,i)=>{
+      content+=`\n[${i+1}] ${item.querySelector('.alert-msg').textContent}\n`;
+      content+=`    ${item.querySelector('.alert-meta').textContent}\n`;
+    });
+  } else if(section==='devices'){
+    content='DEVICE STATUS REPORT\n'+'─'.repeat(30)+'\n';
+    document.querySelectorAll('#deviceList .dev-row').forEach((row,i)=>{
+      content+=`\n[${i+1}] ${row.querySelector('.dev-name').textContent.trim()}\n`;
+      content+=`    Status: ${row.querySelector('.dev-status').textContent.trim()}\n`;
+    });
+  }
+  document.getElementById('printPreviewBody').innerHTML=
+    `SCHEMASECURE — COMMAND DIVISION\n`+
+    `${'═'.repeat(40)}\n`+
+    content+
+    `\nPRINTED BY: ${document.getElementById('profName').textContent}\n`+
+    `DATE/TIME: ${now}\n`+
+    `CLASSIFICATION: RESTRICTED\n`+
+    `${'═'.repeat(40)}`;
+  openOv('ovPrint');
+}
+function openPrintReport(){
+  const now=new Date().toLocaleString();
+  const rows=accessRecords.slice(0,10).map((r,i)=>
+    `[${i+1}] ${r.status.toUpperCase().padEnd(8)} ${r.name.padEnd(24)} ${r.zone.padEnd(22)} ${r.time}`
+  ).join('\n');
+  document.getElementById('printPreviewBody').innerHTML=
+    `SCHEMASECURE — COMMAND DIVISION\n`+
+    `SECURITY OPERATIONS FULL REPORT\n`+
+    `${'═'.repeat(50)}\n\n`+
+    `SYSTEM STATUS: ONLINE\n`+
+    `CAMERAS: 18/20 ACTIVE\n`+
+    `ACTIVE ALERTS: 3\n`+
+    `THREAT LEVEL: LOW\n\n`+
+    `ACCESS LOG (LAST ${accessRecords.length} RECORDS)\n`+
+    `${'─'.repeat(50)}\n`+
+    `STATUS   NAME                     ZONE                  TIME\n`+
+    rows+`\n\n`+
+    `PRINTED BY: ${document.getElementById('profName').textContent}\n`+
+    `DATE/TIME: ${now}\n`+
+    `CLASSIFICATION: RESTRICTED — AUTHORIZED PERSONNEL ONLY\n`+
+    `${'═'.repeat(50)}`;
+  openOv('ovPrint');
+}
+function doPrint(){
+  window.print();
+}
+
+// ═══════════ WEBCAM ═══════════
+async function requestWebcam(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    webcamStream=stream;
+    const liveHTML='<div class="rec-dot" style="background:var(--green);"></div><span style="color:var(--green);">LIVE</span>';
+    // Overview cams
+    [['vid01','cam01ph','badge01','ts01'],['vid02','cam02ph','badge02','ts02'],['vid04','cam04ph','badge04','ts04']].forEach(([vid,ph,badge,ts])=>{
+      const v=document.getElementById(vid);
+      if(v){v.srcObject=stream;v.style.display='block';}
+      const p=document.getElementById(ph);
+      if(p)p.style.display='none';
+      const b=document.getElementById(badge);
+      if(b)b.innerHTML=liveHTML;
+    });
+    // Cameras tab
+    [['vidC01','camC01ph','badgeC01'],['vidC04','camC04ph','badgeC04'],['vidC06','camC06ph','badgeC06']].forEach(([vid,ph,badge])=>{
+      const v=document.getElementById(vid);
+      if(v){v.srcObject=stream;v.style.display='block';}
+      const p=document.getElementById(ph);
+      if(p)p.style.display='none';
+      const b=document.getElementById(badge);
+      if(b)b.innerHTML=liveHTML;
+    });
+    const n=document.getElementById('camNotice');
+    if(n)n.style.display='none';
+  }catch(e){
+    alert('📷 Camera access denied.\n\nTo allow:\n1. Click the camera icon in your browser address bar\n2. Select "Allow"\n3. Click "Connect Camera" again');
+  }
+}
+
+// ═══════════ CLOCK ═══════════
+setInterval(()=>{
+  const now=new Date();
+  const t=now.toLocaleTimeString('en-US',{hour12:false});
+  const d=now.toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  const c=document.getElementById('clockEl');if(c)c.textContent=t;
+  const ds=document.getElementById('dateEl');if(ds)ds.textContent='COMMAND BASE · '+d+' · '+t;
+  // update timestamps on cam feeds
+  ['ts01','ts02','ts04'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=t;});
+},1000);
+
+// ═══════════ INIT ═══════════
+renderAccessTable();
+</script>
+</body>
+</html>
